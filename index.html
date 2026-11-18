@@ -14,17 +14,16 @@ header .credit{margin-top:5px;font-size:9.5px;color:#888;letter-spacing:.8px;tex
 .main{flex:1;overflow-y:auto;padding:12px}
 .inputBox{background:#161616;border:2px solid #2a2a2a;border-radius:18px;padding:14px 16px;display:flex;gap:10px;align-items:center}
 .inputDisplay{flex:1;color:#fff;font-size:28px;font-weight:800;min-height:32px;word-break:break-all}
+.inputDisplay:empty:before{content:'Escribe...';color:#444;font-size:20px}
 #clearBtn{width:44px;height:44px;border-radius:12px;background:#242424;border:1px solid #333;color:#fff;font-size:18px}
 .tabs{display:flex;gap:7px;overflow-x:auto;padding:8px 2px;scrollbar-width:none}
-.tabs::-webkit-scrollbar{display:none}
 .tab{padding:10px 16px;border-radius:24px;background:#151515;border:2px solid #252525;color:#777;font-size:12px;font-weight:700;white-space:nowrap;flex-shrink:0}
 .tab.active{background:#fff;color:#000;border-color:#fff}
 .symbolsGrid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px;margin-top:8px}
 .sym{min-height:54px;background:#151515;border:2px solid #232323;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px}
-.suggestions{display:flex;flex-direction:column;gap:10px;margin-top:12px;padding-bottom:24px}
 .card{background:#121212;border:2px solid #222;border-radius:16px;padding:14px 12px;display:flex;justify-content:space-between;align-items:center;min-height:66px}
 .cardText{font-size:19px;font-weight:700;flex:1;margin-right:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.copyBtn{background:#fff;color:#000;border:none;padding:10px 16px;border-radius:10px;font-weight:900;font-size:12px;flex-shrink:0}
+.copyBtn{background:#fff;color:#000;border:none;padding:10px 16px;border-radius:10px;font-weight:900;font-size:12px}
 .keyboard{background:#0e0e0e;border-top:2px solid #222;padding:6px 6px 10px 6px;flex-shrink:0}
 .kb-row{display:flex;gap:5px;margin:5px 0;justify-content:center}
 .kb-key{flex:1;height:52px;background:#202020;border-radius:11px;color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600}
@@ -32,17 +31,14 @@ header .credit{margin-top:5px;font-size:9.5px;color:#888;letter-spacing:.8px;tex
 .kb-key.action{background:#fff;color:#000;font-weight:900;flex:1.9}
 .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;color:#000;padding:14px 24px;border-radius:30px;font-weight:900;opacity:0;transition:.2s;pointer-events:none;z-index:99}
 .toast.show{opacity:1}
-.footer{ text-align:center; padding:18px 0 6px 0; font-size:8.5px; color:#2a2a2a; letter-spacing:1px}
+.footer{text-align:center;padding:18px 0 6px 0;font-size:8.5px;color:#2a2a2a;letter-spacing:1px}
 </style>
 </head>
 <body>
 <div class="app">
-<header>
-<h1>SOURCES</h1>
-<div class="credit">Application created by Esteban David Cervantes Ortiz</div>
-</header>
+<header><h1>SOURCES</h1><div class="credit">Application created by Esteban David Cervantes Ortiz</div></header>
 <div class="main">
-<div class="inputBox"><div id="mainInput" class="inputDisplay">W1N</div><button id="clearBtn">✕</button></div>
+<div class="inputBox"><div id="mainInput" class="inputDisplay"></div><button id="clearBtn">✕</button></div>
 <div class="tabs" id="cats"></div>
 <div class="symbolsGrid" id="symGrid"></div>
 <div class="suggestions" id="sugList"></div>
@@ -52,74 +48,26 @@ header .credit{margin-top:5px;font-size:9.5px;color:#888;letter-spacing:.8px;tex
 </div>
 <div class="toast" id="toast">Copiado ✓</div>
 <script>
-const cats={
-'Estrellas':['✦','✧','★','☆','✩','✪','✯','✵'],
-'Cruces':['†','‡','✞','✟','⚔','×','メ','么'],
-'Coronas':['♛','♚','亗','ツ','么','乡','父'],
-'Marcos':['『','』','','「','」','《','》','・','丨','气'],
-'Especial':['ㅤ','⠀','꒰','꒱']
-};
+const cats={'Estrellas':['✦','✧','★','☆','✩','✪','✯','✵','✶','✷','✸','✹'],'Cruces':['†','‡','✞','✟','✝','✙','✚','✛','✜','✝','⚔','☨'],'Coronas':['♛','♚','♔','♕','👑','亗','ツ','么','乡','父','☬','☠'],'Marcos':['『','』','「','」','《','》','【','】','・','丨','气','꧂'],'Especial':['꒰','꒱','ঔ','ৣ','༒','☬','✞','꧁','꧂','乂','♛','•']};
 let cur='Estrellas';
 function renderCats(){const c=document.getElementById('cats');c.innerHTML='';Object.keys(cats).forEach(k=>{const d=document.createElement('div');d.className='tab'+(k===cur?' active':'');d.textContent=k;d.onclick=()=>{cur=k;renderCats();renderSyms();};c.appendChild(d);});}
-function renderSyms(){const g=document.getElementById('symGrid');g.innerHTML='';cats[cur].forEach(s=>{const b=document.createElement('div');b.className='sym';b.textContent=s==='ㅤ'?'INV':s==='⠀'?'INV2':s;b.onclick=()=>addText(s);g.appendChild(b);});}
+function renderSyms(){const g=document.getElementById('symGrid');g.innerHTML='';cats[cur].forEach(s=>{if(!s.trim())return;const b=document.createElement('div');b.className='sym';b.textContent=s;b.onclick=()=>addText(s);g.appendChild(b);});}
 renderCats();renderSyms();
-
 let currentText='W1N';
 const display=document.getElementById('mainInput');
-function updateDisplay(){display.textContent=currentText||' ';renderList();}
+function updateDisplay(){display.textContent=currentText;renderList();}
 function addText(t){currentText+=t;updateDisplay();}
 function delText(){currentText=currentText.slice(0,-1);updateDisplay();}
-
-const fontData=[
-{name:'PEQUEÑA', fn:t=>{const u='ᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᵠᴿˢᵀᵁⱽᵂˣʸᶻ',l='ᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖᑫʳˢᵗᵘᵛʷˣʸᶻ';return t.split('').map(c=>{if(c>='A'&&c<='Z')return u[c.charCodeAt(0)-65]||c;if(c>='a'&&c<='z')return l[c.charCodeAt(0)-97]||c;return c;}).join('');}},
-{name:'NEGRITA', fn:t=>{const u='𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭',l='𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇';return t.split('').map(c=>{if(c>='A'&&c<='Z')return u[c.charCodeAt(0)-65]||c;if(c>='a'&&c<='z')return l[c.charCodeAt(0)-97]||c;return c;}).join('');}},
-{name:'ESPACIADA', fn:t=>t.split('').map(ch=>{let co=ch.charCodeAt(0);if(co>=65&&co<=90)return String.fromCharCode(0xFF21+co-65);if(co>=97&&co<=122)return String.fromCharCode(0xFF41+co-97);return ch;}).join('')},
-{name:'CURSIVA', fn:t=>{const u='𝒜ℬ𝒞𝒟ℰℱ𝒢ℋℐ𝒥𝒦ℒℳ𝒩𝒪𝒫𝒬ℛ𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵',l='𝒶𝒷𝒸𝒹𝑒𝒻𝑔𝒽𝒾𝒿𝓀𝓁𝓂𝓃𝑜𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏';return t.split('').map(c=>{if(c>='A'&&c<='Z')return u[c.charCodeAt(0)-65]||c;if(c>='a'&&c<='z')return l[c.charCodeAt(0)-97]||c;return c;}).join('');}},
-];
-
-const decor=[
-{n:'PRO', t:s=>`꧁༒☬${s}☬༒꧂`},
-{n:'GÓTICO', t:s=>`꧁ঔৣ☬✞${s}✞☬ঔৣ꧂`},
-{n:'TRYHARD', t:s=>`乂${s}乂`},
-{n:'CORONA', t:s=>`♛ ${s} ♛`},
-{n:'BORDES', t:s=>``},
-{n:'NINJA', t:s=>`忍 ${s} 忍`},
-{n:'DRIP', t:s=>`『•⊰✿${s}✿⊱•』`},
-{n:'INVISIBLE ㅤ', t:s=>`ㅤ${s}ㅤ`},
-{n:'INVISIBLE ⠀', t:s=>`⠀${s}⠀`},
-{n:'ESPACIO ㅤ', t:s=>s.split('').join('ㅤ')},
-{n:'ESPACIO ⠀', t:s=>s.split('').join('⠀')},
-{n:'DOBLE ESPACIO', t:s=>s.split('').join('ㅤ⠀')},
-];
-
-function renderList(){
- const txt=currentText||'W1N';
- const list=document.getElementById('sugList');list.innerHTML='';
- fontData.forEach(f=>{
-  const val=f.fn(txt);
-  const card=document.createElement('div');card.className='card';
-  card.innerHTML=`<div class="cardText">${val}</div><button class="copyBtn">Copiar</button>`;
-  card.querySelector('.copyBtn').onclick=()=>{navigator.clipboard.writeText(val);showToast(f.name);};
-  list.appendChild(card);
- });
- decor.forEach(d=>{
-  const val=d.t(txt);
-  if(!val || !val.replace(/[ㅤ⠀\s]/g,'').trim()) return;
-  if(val===txt && d.n==='BORDES') return;
-  const card=document.createElement('div');card.className='card';
-  card.innerHTML=`<div class="cardText">${val}</div><button class="copyBtn">Copiar</button>`;
-  card.querySelector('.copyBtn').onclick=()=>{navigator.clipboard.writeText(val);showToast('Copiado');};
-  list.appendChild(card);
- });
-}
-renderList();
+const fontData=[{name:'PEQUEÑA',fn:t=>{const u='ᴬᴮᶜᴰᴱᶠᴳᴴᴵᴶᴷᴸᴹᴺᴼᴾᵠᴿˢᵀᵁⱽᵂˣʸᶻ',l='ᵃᵇᶜᵈᵉᶠᵍʰⁱʲᵏˡᵐⁿᵒᵖᑫʳˢᵗᵘᵛʷˣʸᶻ';return t.split('').map(c=>{if(c>='A'&&c<='Z')return u[c.charCodeAt(0)-65]||c;if(c>='a'&&c<='z')return l[c.charCodeAt(0)-97]||c;return c;}).join('');}},{name:'NEGRITA',fn:t=>{const u='𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭',l='𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇';return t.split('').map(c=>{if(c>='A'&&c<='Z')return u[c.charCodeAt(0)-65]||c;if(c>='a'&&c<='z')return l[c.charCodeAt(0)-97]||c;return c;}).join('');}},{name:'ESPACIADA',fn:t=>t.split('').map(ch=>{let co=ch.charCodeAt(0);if(co>=65&&co<=90)return String.fromCharCode(0xFF21+co-65);if(co>=97&&co<=122)return String.fromCharCode(0xFF41+co-97);return ch;}).join('')},{name:'CURSIVA',fn:t=>{const u='𝒜ℬ𝒞𝒟ℰℱ𝒢ℋℐ𝒥𝒦ℒℳ𝒩𝒪𝒫𝒬ℛ𝒮𝒯𝒰𝒱𝒲𝒳𝒴𝒵',l='𝒶𝒷𝒸𝒹𝑒𝒻𝑔𝒽𝒾𝒿𝓀𝓁𝓂𝓃𝑜𝓅𝓆𝓇𝓈𝓉𝓊𝓋𝓌𝓍𝓎𝓏';return t.split('').map(c=>{if(c>='A'&&c<='Z')return u[c.charCodeAt(0)-65]||c;if(c>='a'&&c<='z')return l[c.charCodeAt(0)-97]||c;return c;}).join('');}},];
+const decor=[{n:'PRO',t:s=>`꧁༒☬${s}☬༒꧂`},{n:'GÓTICO',t:s=>`꧁ঔৣ☬✞${s}✞☬ঔৣ꧂`},{n:'TRYHARD',t:s=>`乂${s}乂`},{n:'CORONA',t:s=>`♛ ${s} ♛`},{n:'NINJA',t:s=>`忍 ${s} 忍`},{n:'DRIP',t:s=>`『•⊰✿${s}✿⊱•』`},{n:'INVISIBLE ㅤ',t:s=>`ㅤ${s}ㅤ`},{n:'INVISIBLE ⠀',t:s=>`⠀${s}⠀`},{n:'ESPACIO ㅤ',t:s=>s.split('').join('ㅤ')},{n:'ESPACIO ⠀',t:s=>s.split('').join('⠀')},];
+function renderList(){const txt=currentText||'W1N';const list=document.getElementById('sugList');list.innerHTML='';fontData.forEach(f=>{const val=f.fn(txt);const card=document.createElement('div');card.className='card';card.innerHTML=`<div class="cardText">${val}</div><button class="copyBtn">Copiar</button>`;card.querySelector('.copyBtn').onclick=()=>{navigator.clipboard.writeText(val);showToast(f.name);};list.appendChild(card);});decor.forEach(d=>{const val=d.t(txt);if(!val)return;const clean=val.replace(/[ㅤ⠀\s]/g,'').trim();if(!clean)return;const card=document.createElement('div');card.className='card';card.innerHTML=`<div class="cardText">${val}</div><button class="copyBtn">Copiar</button>`;card.querySelector('.copyBtn').onclick=()=>{navigator.clipboard.writeText(val);showToast('Copiado');};list.appendChild(card);});}
+updateDisplay();
 document.getElementById('clearBtn').onclick=()=>{currentText='';updateDisplay();};
-
 const layout=[['Q','W','E','R','T','Y','U','I','O','P'],['A','S','D','F','G','H','J','K','L'],['⇧','Z','X','C','V','B','N','M','⌫'],['123','Espacio','COPIAR']];
-const kb=document.getElementById('keyboard');let upper=true;
-function buildKB(){kb.innerHTML='';layout.forEach(row=>{const r=document.createElement('div');r.className='kb-row';row.forEach(k=>{const key=document.createElement('div');key.className='kb-key';if(k==='Espacio'){key.classList.add('wide');key.textContent='Espacio';key.style.flex='3';}else if(k==='123'||k==='⇧'||k==='⌫'){key.classList.add('wide');key.textContent=k;}else if(k==='COPIAR'){key.classList.add('action');key.textContent='COPIAR';}else key.textContent=upper?k:k.toLowerCase();key.onclick=()=>{if(k==='⌫')delText();else if(k==='⇧'){upper=!upper;buildKB();return;}else if(k==='Espacio')addText(' ');else if(k==='COPIAR'){navigator.clipboard.writeText(currentText);showToast('Todo copiado');}else if(k==='123'){cur=cur==='Estrellas'?'Coronas':'Estrellas';renderCats();renderSyms();return;}else addText(key.textContent);};r.appendChild(key);});kb.appendChild(r);});}
+const kb=document.getElementById('keyboard');let upper=true;let numMode=false;
+function buildKB(){kb.innerHTML='';const currentLayout=numMode?[['1','2','3','4','5','6','7','8','9','0'],['-','/',';',':','(',')','$','&','@','"'],['ABC','.',' , ',',','?','!','\'','⌫'],['Espacio','COPIAR']]:layout;currentLayout.forEach(row=>{const r=document.createElement('div');r.className='kb-row';row.forEach(k=>{const key=document.createElement('div');key.className='kb-key';if(k==='Espacio'){key.classList.add('wide');key.textContent='Espacio';key.style.flex='3';}else if(k==='ABC'||k==='123'||k==='⇧'||k==='⌫'){key.classList.add('wide');key.textContent=k;}else if(k==='COPIAR'){key.classList.add('action');key.textContent='COPIAR';}else{key.textContent=upper&&!numMode?k:(numMode?k:k.toLowerCase());}key.onclick=()=>{if(k==='⌫')delText();else if(k==='⇧'){upper=!upper;buildKB();return;}else if(k==='Espacio')addText(' ');else if(k==='COPIAR'){navigator.clipboard.writeText(currentText||'W1N');showToast('Todo copiado');}else if(k==='123'){numMode=true;buildKB();return;}else if(k==='ABC'){numMode=false;buildKB();return;}else addText(key.textContent);};r.appendChild(key);});kb.appendChild(r);});}
 buildKB();
 function showToast(m){const t=document.getElementById('toast');t.textContent=m+' ✓';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1200);}
 </script>
 </body>
-  </html>
+</html>
